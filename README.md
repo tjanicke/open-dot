@@ -14,6 +14,7 @@ tools are in a separate repository, [tjanicke/bridge-se](https://github.com/tjan
 | OpenTollz: Illinois Tollway bid results | [tolls.open-dot.org](https://tolls.open-dot.org/) | `apps/opentollz/` |
 | OpenTollSelections: Tollway PSB selections | [tollselections.open-dot.org](https://tollselections.open-dot.org/) | `apps/opentollselections/` |
 | ODOT Selections: Ohio DOT consultant selections | [odotselections.open-dot.org](https://odotselections.open-dot.org/) | `apps/ohioselections/` |
+| Example Bridge Plans: IDOT bridge plan examples by structure type | [bridgeplans.open-dot.org](https://bridgeplans.open-dot.org/) | `apps/bridgeplans/` |
 | Open Bulletins: IDOT PTB and Tollway PSB bulletin search | [bulletins.open-dot.org](https://bulletins.open-dot.org/) | `apps/open-bulletins/` |
 | Open DOT Search: letting document search | [search.open-dot.org](https://search.open-dot.org/) | `apps/search/` |
 | Home page | [open-dot.org](https://open-dot.org/) | `site/homepage/` |
@@ -31,7 +32,8 @@ consultant-prepared proposals or other consultant-originated work.
   app reads its table from a data folder or a path set by an environment variable (for example
   `OPENTOLL_DATA_FILE` or `BULLETINS_DATA`). Some Dockerfiles copy a data file into the image, so
   place the matching file next to the Dockerfile before building.
-- **The data collection pipelines and server configuration**, which are kept private.
+- **The data collection pipelines and server configuration**, which are kept private. For Example
+  Bridge Plans that includes the index builder; only the web app (`app.py`, `sheets.py`, `web/`) is here.
 - **Credentials.** Apps that need them (Open Bulletins and Open DOT Search, which query
   Elasticsearch) read them from environment variables such as `ES_USERNAME`, `ES_PASSWORD` and
   `ES_API_KEY`. None are stored here.

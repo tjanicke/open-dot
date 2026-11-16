@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenDOT · Example Bridge Plans</title>
+<link rel="stylesheet" href="style.css">
+<script>/* apply the saved or system theme before the page draws */
+(function(){var t;try{t=localStorage.getItem('opendot-bridgeplans-theme')}catch(e){}
+if(t!=='light'&&t!=='dark'){t=window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}
+document.documentElement.setAttribute('data-theme',t)})();</script>
+</head>
+<body>
+<header>
+  <div class="wrap bar">
+    <div class="brand"><a href="https://open-dot.org/" title="Open DOT home">OpenDOT</a> <span>Example Bridge Plans</span></div>
+    <div class="bar-right">
+      <div id="meta" class="muted"></div>
+      <button type="button" id="theme" class="theme-toggle" aria-pressed="false">Dark mode</button>
+    </div>
+  </div>
+</header>
+<main class="wrap">
+  <form id="filters" autocomplete="off">
+    <label class="wide">Structure type
+      <select name="type" id="type"><option value="">All types</option></select>
+    </label>
+    <label class="wide">Road, stream, contract or SN
+      <input name="q" placeholder="e.g. Kishwaukee, I-90, 60X91, 016-1234">
+    </label>
+    <label>County
+      <input name="county" placeholder="Name or 001–102">
+    </label>
+    <label>Drawings
+      <select name="kind">
+        <option value="design">New design</option>
+        <option value="rehab">Rehab / repair</option>
+        <option value="maintenance">Maintenance (washing, painting)</option>
+        <option value="partial">Partial sets</option>
+        <option value="any">Anything</option>
+      </select>
+    </label>
+    <label>Max span (ft)
+      <span class="pair"><input name="min_span" inputmode="decimal" placeholder="min"><input name="max_span" inputmode="decimal" placeholder="max"></span>
+    </label>
+    <label>Letting year
+      <span class="pair"><input name="min_year" inputmode="numeric" placeholder="from"><input name="max_year" inputmode="numeric" placeholder="to"></span>
+    </label>
+    <label>Type evidence
+      <select name="source">
+        <option value="">Any</option>
+        <option value="settled">Settled only</option>
+        <option value="confirmed">Confirmed (two sources agree)</option>
+        <option value="pay_items">From pay items</option>
+        <option value="ai">Read by local model</option>
+        <option value="conflict">Conflicts to check</option>
+      </select>
+    </label>
+    <label>Construction (from pay items)
+      <select name="construction">
+        <option value="">Any</option>
+        <option value="precast">Precast</option>
+        <option value="cast-in-place">Cast-in-place</option>
+      </select>
+    </label>
+    <label>Pay items include
+      <select name="feature">
+        <option value="">Anything</option>
+        <option value="modular_joint">Modular expansion joint</option>
+        <option value="finger_joint">Finger plate joint</option>
+        <option value="strip_seal">Strip seal joint</option>
+        <option value="bearing_replacement">Bearing replacement</option>
+        <option value="deck_overlay">Deck overlay</option>
+        <option value="removal_superstructure">Superstructure removal</option>
+        <option value="cleaning_painting">Cleaning &amp; painting</option>
+        <option value="washing">Bridge washing</option>
+        <optgroup label="Retaining walls">
+          <option value="wall_mse">MSE wall</option>
+          <option value="wall_cast_in_place">Cast-in-place wall</option>
+          <option value="wall_soldier_pile">Soldier pile wall</option>
+          <option value="wall_sheet_pile">Permanent sheet pile wall</option>
+          <option value="wall_segmental_block">Segmental block wall</option>
+          <option value="wall_precast_modular">Precast modular wall</option>
+          <option value="wall_geotextile_gabion">Geotextile / gabion wall</option>
+          <option value="wall_soil_nail">Soil nail wall</option>
+          <option value="noise_wall">Noise wall</option>
+        </optgroup>
+      </select>
+    </label>
+    <label>Sort
+      <select name="sort">
+        <option value="relevance">Best drawings first</option>
+        <option value="newest">Newest letting</option>
+        <option value="oldest">Oldest letting</option>
+        <option value="span">Longest span</option>
+      </select>
+    </label>
+    <button type="submit">Search</button>
+  </form>
+
+  <div class="resultbar">
+    <h2 id="count"></h2>
+    <a id="export" href="export.csv">Export CSV</a>
+  </div>
+  <div id="results"></div>
+  <nav id="pager" hidden>
+    <button type="button" id="prev" class="ghost">← Previous</button>
+    <span id="pos"></span>
+    <button type="button" id="next" class="ghost">Next →</button>
+  </nav>
+  <p class="foot muted">Types come from IDOT's 2025 inventory and the wording on the plan sheets; anything read by the
+    local model is labeled. Sheet titles are recognized automatically: open the drawing before relying on it.</p>
+</main>
+<script src="app.js"></script>
+</body>
+</html>

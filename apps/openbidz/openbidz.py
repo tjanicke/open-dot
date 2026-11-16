@@ -541,7 +541,9 @@ def Page():
     solara.Style(_OPENDOT_STYLE)
     with solara.Column(classes=["openbidz-app"], gap="12px"):
         with solara.Row(justify="space-between", classes=["opendot-page-heading"], style="align-items: center; flex-wrap: wrap; gap: 16px;"):
-            solara.Markdown('# Open Bids\n\nSearch historical IDOT bid items and contract records')
+            with solara.Column(gap="2px", style="flex: 1 1 auto; min-width: 0;"):
+                solara.HTML(tag="div", classes=["opendot-brand"], unsafe_innerHTML='<a href="https://open-dot.org/" style="color:rgb(var(--v-theme-secondary));font-size:.85rem;font-weight:600;letter-spacing:.02em;text-decoration:none">OpenDOT</a>')
+                solara.Markdown('# Open Bids\n\nSearch historical IDOT bid items and contract records')
             _OpenDOTThemeSwitch.element(dark=selected_theme, on_dark=set_dark_mode)
 
         # ---- COMPACT RESPONSIVE SEARCH PANEL ----

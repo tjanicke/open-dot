@@ -633,7 +633,9 @@ def Page():
     solara.Style(_OPENDOT_STYLE)
     with solara.Column(classes=["openselections-app"], gap="12px"):
         with solara.Row(justify="space-between", classes=["opendot-page-heading"], style="align-items: center; flex-wrap: wrap; gap: 16px;"):
-            solara.Markdown('# Open Selections\n\nSearch historical IDOT engineering consultant selections')
+            with solara.Column(gap="2px", style="flex: 1 1 auto; min-width: 0;"):
+                solara.HTML(tag="div", classes=["opendot-brand"], unsafe_innerHTML='<a href="https://open-dot.org/" style="color:rgb(var(--v-theme-secondary));font-size:.85rem;font-weight:600;letter-spacing:.02em;text-decoration:none">OpenDOT</a>')
+                solara.Markdown('# Open Selections\n\nSearch historical IDOT engineering consultant selections')
             _OpenDOTThemeSwitch.element(dark=selected_theme, on_dark=set_dark_mode)
 
         with solara.Card(

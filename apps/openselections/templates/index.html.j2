@@ -1,0 +1,45 @@
+{% extends "solara.html.j2" %}
+
+{% block header %}
+{{ super() }}
+
+<meta name="description"
+      content="Search Illinois DOT engineering consultant selections, selected firms, PTB numbers, project descriptions, and professional transportation bulletin results.">
+
+<link rel="canonical" href="https://selections.open-dot.org/">
+
+{% endblock header %}
+
+{% block after_pre_rendered_html %}
+
+<section id="opendot-seo-info"
+         aria-label="About OpenDOT Selections"
+         style="max-width:960px; margin:32px auto;
+                padding:24px; font-family:system-ui,sans-serif;
+                color:#263445; background:#f4f7f9;
+                border-radius:12px;">
+
+  <h2>Illinois DOT Engineering Consultant Selections</h2>
+
+  <p>
+    OpenDOT provides searchable Illinois Department of
+    Transportation engineering consultant selection information
+    from Professional Transportation Bulletins (PTBs).
+  </p>
+
+  <p>
+    Search selected consulting firms, PTB numbers, project
+    descriptions, and historical selection results to research
+    Illinois transportation engineering opportunities.
+  </p>
+
+  <p>
+    <a href="https://open-dot.org/">
+      Explore other OpenDOT transportation data tools
+    </a>
+  </p>
+
+</section>
+
+{% endblock after_pre_rendered_html %}
+

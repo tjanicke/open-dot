@@ -13,6 +13,7 @@ tools are in a separate repository, [tjanicke/bridge-se](https://github.com/tjan
 | OpenSelections: IDOT PTB consultant selections | [selections.open-dot.org](https://selections.open-dot.org/) | `apps/openselections/` |
 | OpenTollz: Illinois Tollway bid results | [tolls.open-dot.org](https://tolls.open-dot.org/) | `apps/opentollz/` |
 | OpenTollSelections: Tollway PSB selections | [tollselections.open-dot.org](https://tollselections.open-dot.org/) | `apps/opentollselections/` |
+| ODOT Selections: Ohio DOT consultant selections | [odotselections.open-dot.org](https://odotselections.open-dot.org/) | `apps/ohioselections/` |
 | Open Bulletins: IDOT PTB and Tollway PSB bulletin search | [bulletins.open-dot.org](https://bulletins.open-dot.org/) | `apps/open-bulletins/` |
 | Open DOT Search: letting document search | [search.open-dot.org](https://search.open-dot.org/) | `apps/search/` |
 | Home page | [open-dot.org](https://open-dot.org/) | `site/homepage/` |
@@ -34,8 +35,6 @@ consultant-prepared proposals or other consultant-originated work.
 - **Credentials.** Apps that need them (Open Bulletins and Open DOT Search, which query
   Elasticsearch) read them from environment variables such as `ES_USERNAME`, `ES_PASSWORD` and
   `ES_API_KEY`. None are stored here.
-- **SEO page templates.** The OpenBidz and OpenSelections Dockerfiles copy a `templates/` folder
-  that is not yet in this repository.
 
 ## Run an app locally
 

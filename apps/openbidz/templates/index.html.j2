@@ -1,0 +1,45 @@
+{% extends "solara.html.j2" %}
+
+{% block header %}
+{{ super() }}
+
+<meta name="description"
+      content="Search Illinois DOT highway construction bid prices, pay items, contract data, letting results, and transportation construction costs.">
+
+<link rel="canonical" href="https://bids.open-dot.org/">
+
+{% endblock header %}
+
+{% block after_pre_rendered_html %}
+
+<section id="opendot-seo-info"
+         aria-label="About OpenDOT Bids"
+         style="max-width:960px; margin:32px auto;
+                padding:24px; font-family:system-ui,sans-serif;
+                color:#263445; background:#f4f7f9;
+                border-radius:12px;">
+
+  <h2>Illinois DOT Construction Bids and Prices</h2>
+
+  <p>
+    OpenDOT provides searchable department of 
+    transportation construction bid information, including
+    bid item prices, contract numbers, letting dates,
+    counties, districts, and construction quantities.
+  </p>
+
+  <p>
+    Explore historical bidding information and compare
+    construction pay items to support cost estimating,
+    bid research, and transportation project analysis.
+  </p>
+
+  <p>
+    <a href="https://open-dot.org/">
+      Explore other OpenDOT transportation data tools
+    </a>
+  </p>
+
+</section>
+
+{% endblock after_pre_rendered_html %}

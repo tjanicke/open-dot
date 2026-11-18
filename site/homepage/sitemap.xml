@@ -4,15 +4,33 @@
     <loc>https://open-dot.org/</loc>
   </url>
   <url>
-    <loc>https://bids.open-dot.org/</loc>
+    <loc>https://open-dot.org/about.html</loc>
   </url>
   <url>
     <loc>https://search.open-dot.org/</loc>
   </url>
   <url>
-  <loc>https://selections.open-dot.org/</loc>
+    <loc>https://bids.open-dot.org/</loc>
+  </url>
+  <url>
+    <loc>https://selections.open-dot.org/</loc>
   </url>
   <url>
     <loc>https://bulletins.open-dot.org/</loc>
+  </url>
+  <url>
+    <loc>https://tolls.open-dot.org/</loc>
+  </url>
+  <url>
+    <loc>https://tollselections.open-dot.org/</loc>
+  </url>
+  <url>
+    <loc>https://odotselections.open-dot.org/</loc>
+  </url>
+  <url>
+    <loc>https://bridgeplans.open-dot.org/</loc>
+  </url>
+  <url>
+    <loc>https://bridge-se.open-dot.org/</loc>
   </url>
 </urlset>

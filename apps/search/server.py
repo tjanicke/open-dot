@@ -47,6 +47,57 @@ def params(q):
     page=integer(q.get('page'),1,1,500)
     return dict(q=query,year_from=start,year_to=end,sort=sort,type=kind,contract=contract,page=page)
 
+DESCRIPTIONS={'key':None,'rows':[]}
+def descriptions_path():
+    return Path(os.environ.get('OPENDOT_DESCRIPTIONS',str(Path.home()/'opendot-search/state/contract-descriptions.sqlite3')))
+
+def description_rows():
+    """(contract, words, word set) for every description, reloaded when the database file changes."""
+    path=descriptions_path()
+    try:st=path.stat()
+    except OSError:return []
+    key=(st.st_mtime_ns,st.st_size)
+    with LOCK:
+        if DESCRIPTIONS['key']==key:return DESCRIPTIONS['rows']
+    rows=[]
+    try:
+        with closing(sqlite3.connect(path.as_uri()+'?mode=ro',uri=True,timeout=5)) as db:
+            for contract,text in db.execute("SELECT contract,description FROM bulletin WHERE description<>'' "
+                                            "UNION SELECT contract,description FROM spec WHERE description<>''"):
+                words=tuple(re.findall(r'[a-z0-9]+',text.lower()))
+                rows.append((contract,words,frozenset(words)))
+    except sqlite3.Error:return []
+    with LOCK:DESCRIPTIONS.update(key=key,rows=rows)
+    return rows
+
+def described(q,limit=1000):
+    """Contracts whose description contains every search word, in two tiers: words kept together
+    (at most one word between, so "IL 53" matches "IL Route 53") and words anywhere. A quoted
+    phrase must always be kept together; words or phrases marked with - are ignored. A tier
+    that would hold more than `limit` contracts is dropped as too general to single out projects."""
+    q=re.sub(r'(?<![\w-])-"[^"]*"','',q or '')
+    phrases=[p for p in (re.findall(r'[a-z0-9]+',x.lower()) for x in re.findall(r'"([^"]*)"',q)) if len(p)>1]
+    words=[t.lower() for t in re.findall(r'-?[A-Za-z0-9]+',q.replace('"',' ')) if not t.startswith('-')]
+    if not words:return [],[]
+    need=set(words); together=set(); anywhere=set()
+    for contract,text,vocab in description_rows():
+        if not need<=vocab or not all(near(text,p) for p in phrases):continue
+        (together if len(words)==1 or near(text,words) else anywhere).add(contract)
+    together=sorted(together) if len(together)<=limit else []
+    anywhere=sorted(anywhere-set(together)) if len(anywhere)<=limit else []
+    return together,anywhere
+
+def near(text,words):
+    for start,w in enumerate(text):
+        if w!=words[0]:continue
+        at=start
+        for nxt in words[1:]:
+            window=text[at+1:at+3]
+            if nxt not in window:break
+            at+=1+window.index(nxt)
+        else:return True
+    return False
+
 def search_body(p):
     filters=[]
     if p['year_from'] or p['year_to']:
@@ -61,6 +112,10 @@ def search_body(p):
     # somewhere. Scoring only: the set of matching pages is unchanged.
     words=' '.join(re.sub(r'["+|*()~\\-]',' ',p['q']).split())
     should=[{'match_phrase':{'content':{'query':words,'slop':1,'boost':5}}}] if len(words.split())>1 else []
+    # Contracts whose IDOT description matches the search are about it, not just mentioning it: rank them first.
+    together,anywhere=described(p['q'])
+    if together:should.append({'terms':{'contract':together,'boost':100}})
+    if anywhere:should.append({'terms':{'contract':anywhere,'boost':60}})
     sort=[{'_score':'desc'},{'document_id':'asc'}]
     if p['sort']!='relevance':sort=[{'letting_date':'desc' if p['sort']=='newest' else 'asc'},{'document_id':'asc'}]
     return {'size':11,'from':(p['page']-1)*10,'timeout':'20s','track_total_hits':10000,'_source':META,
@@ -127,7 +182,7 @@ def describe(rows):
     """Add IDOT's description of each contract, from contract-descriptions.sqlite3 (built by
     build_descriptions.py): the bulletin description (2018 on) or the Notice to Bidders text in
     the specifications. Missing database or rows leave the cards as they were."""
-    path=Path(os.environ.get('OPENDOT_DESCRIPTIONS',str(Path.home()/'opendot-search/state/contract-descriptions.sqlite3')))
+    path=descriptions_path()
     contracts=sorted({r['contract'] for r in rows if r['contract']})
     if not contracts or not path.exists():return
     marks=','.join('?'*len(contracts))

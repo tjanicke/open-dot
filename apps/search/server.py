@@ -44,31 +44,63 @@ def params(q):
     if kind not in ('','plans','specifications','additional_information','unknown'): raise ValueError('Unknown document type.')
     contract=q.get('contract','').strip().upper()
     if contract and not re.fullmatch(r'[A-Z0-9-]{1,32}',contract): raise ValueError('Enter a valid contract number.')
+    county=q.get('county','').strip()
+    if county and county_key(county) not in COUNTIES: raise ValueError('Unknown county.')
+    district=q.get('district','').strip()
+    if district and not re.fullmatch(r'[1-9]',district): raise ValueError('District must be 1 to 9.')
     page=integer(q.get('page'),1,1,500)
-    return dict(q=query,year_from=start,year_to=end,sort=sort,type=kind,contract=contract,page=page)
+    return dict(q=query,year_from=start,year_to=end,sort=sort,type=kind,contract=contract,
+                county=county_key(county) if county else '',district=district,page=page)
 
-DESCRIPTIONS={'key':None,'rows':[]}
+ILLINOIS_COUNTIES=[c.replace('_',' ') for c in ('Adams Alexander Bond Boone Brown Bureau Calhoun Carroll Cass Champaign '
+    'Christian Clark Clay Clinton Coles Cook Crawford Cumberland DeKalb De_Witt Douglas DuPage Edgar Edwards Effingham '
+    'Fayette Ford Franklin Fulton Gallatin Greene Grundy Hamilton Hancock Hardin Henderson Henry Iroquois Jackson Jasper '
+    'Jefferson Jersey Jo_Daviess Johnson Kane Kankakee Kendall Knox Lake LaSalle Lawrence Lee Livingston Logan McDonough '
+    'McHenry McLean Macon Macoupin Madison Marion Marshall Mason Massac Menard Mercer Monroe Montgomery Morgan Moultrie '
+    'Ogle Peoria Perry Piatt Pike Pope Pulaski Putnam Randolph Richland Rock_Island St._Clair Saline Sangamon Schuyler '
+    'Scott Shelby Stark Stephenson Tazewell Union Vermilion Wabash Warren Washington Wayne White Whiteside Will '
+    'Williamson Winnebago Woodford').split()]
+def county_key(name):return re.sub(r'[^a-z]','',name.lower())
+COUNTIES={county_key(c):c for c in ILLINOIS_COUNTIES}
+
+DESCRIPTIONS={'key':None,'rows':[],'places':{}}
 def descriptions_path():
     return Path(os.environ.get('OPENDOT_DESCRIPTIONS',str(Path.home()/'opendot-search/state/contract-descriptions.sqlite3')))
 
-def description_rows():
-    """(contract, words, word set) for every description, reloaded when the database file changes."""
+def load_descriptions():
+    """Reload the descriptions database when the file changes. Keeps (contract, words, word set) for
+    every description, and the counties and districts IDOT lists for each contract."""
     path=descriptions_path()
     try:st=path.stat()
-    except OSError:return []
+    except OSError:return DESCRIPTIONS
     key=(st.st_mtime_ns,st.st_size)
     with LOCK:
-        if DESCRIPTIONS['key']==key:return DESCRIPTIONS['rows']
-    rows=[]
+        if DESCRIPTIONS['key']==key:return DESCRIPTIONS
+    rows=[];places={}
     try:
         with closing(sqlite3.connect(path.as_uri()+'?mode=ro',uri=True,timeout=5)) as db:
             for contract,text in db.execute("SELECT contract,description FROM bulletin WHERE description<>'' "
                                             "UNION SELECT contract,description FROM spec WHERE description<>''"):
                 words=tuple(re.findall(r'[a-z0-9]+',text.lower()))
                 rows.append((contract,words,frozenset(words)))
-    except sqlite3.Error:return []
-    with LOCK:DESCRIPTIONS.update(key=key,rows=rows)
-    return rows
+            for contract,counties,district in db.execute("SELECT contract,counties,district FROM bulletin "
+                                                         "UNION ALL SELECT contract,county,district FROM spec"):
+                c,d=places.setdefault(contract,(set(),set()))
+                # "Cook", "Pike-Morgan", "Cook, IL-Lake, IN", "Champaign (3.2-Mile)"
+                for part in re.split(r'[,;/&-]|\band\b',re.sub(r'\([^)]*\)','',counties or '')):
+                    k=county_key(re.sub(r'\bcount(?:y|ies)\b','',part,flags=re.I))
+                    if k in COUNTIES:c.add(k)
+                if district and str(district).strip().isdigit():d.add(str(int(district)))
+    except sqlite3.Error:return DESCRIPTIONS
+    with LOCK:DESCRIPTIONS.update(key=key,rows=rows,places=places)
+    return DESCRIPTIONS
+
+def description_rows():return load_descriptions()['rows']
+
+def located(county,district):
+    """Contracts IDOT lists in this county and/or district (from the descriptions database)."""
+    return sorted(c for c,(counties,districts) in load_descriptions()['places'].items()
+                  if (not county or county in counties) and (not district or district in districts))
 
 def described(q,limit=1000):
     """Contracts whose description contains every search word, in two tiers: words kept together
@@ -107,6 +139,8 @@ def search_body(p):
         filters.append({'range':{'letting_date':bounds}})
     for field,key in [('document_type','type'),('contract','contract')]:
         if p[key]: filters.append({'term':{field:p[key]}})
+    if p.get('county') or p.get('district'):
+        filters.append({'terms':{'contract':located(p.get('county'),p.get('district'))}})
     query={'simple_query_string':{'query':p['q'],'fields':['content'],'default_operator':'and'}} if p['q'] else {'match_all':{}}
     # Rank pages where the words appear together (e.g. IL 53) above pages that only contain them
     # somewhere. Scoring only: the set of matching pages is unchanged.
@@ -214,7 +248,8 @@ def contract_search(p):
             return cached[1]
     body=search_body(p)
     body['collapse']={'field':'contract'}
-    body['_source']=['contract','item_number','letting_date']
+    body['_source']=['contract','item_number','letting_date','pdf_name','page','document_type']
+    if p['q']:body['highlight']={**HIGHLIGHT,'fields':{'content':{'fragment_size':200,'number_of_fragments':1}}}
     body['aggs']={
         'contracts':{'cardinality':{'field':'contract','precision_threshold':40000}},
         'pdfs':{'cardinality':{'field':'document_id','precision_threshold':40000}},
@@ -224,9 +259,15 @@ def contract_search(p):
     rows=[]
     for hit in hits[:10]:
         src=hit['_source']
-        rows.append({'contract':src.get('contract') or '',
-                     'item_number':src.get('item_number') or '',
-                     'letting_date':src.get('letting_date') or ''})
+        row={'contract':src.get('contract') or '',
+             'item_number':src.get('item_number') or '',
+             'letting_date':src.get('letting_date') or ''}
+        snippet=' … '.join(hit.get('highlight',{}).get('content',[]))
+        if snippet:
+            # The best-matching page for this contract, so the card shows why it matched.
+            row['match']={'snippet':snippet,'pdf_name':src.get('pdf_name') or '','page':src.get('page'),
+                          'document_type':src.get('document_type') or ''}
+        rows.append(row)
     describe(rows)
     total=data['hits']['total']
     agg=data.get('aggregations',{})

@@ -46,6 +46,13 @@ function documentCard(row,searchState){
   details.ontoggle=()=>{if(details.open&&!started)load();};more.onclick=load;
   details.append(pages,error,more);card.append(details);return card;
 }
+function bestMatch(m){
+  const box=element('span',undefined,'contract-match'),text=element('span',undefined,'contract-snippet');
+  let marked=false;
+  for(const part of m.snippet.split(/(\uE000|\uE001)/)){if(part==='\uE000'){marked=true;continue;}if(part==='\uE001'){marked=false;continue;}text.append(marked?element('mark',part):document.createTextNode(part));}
+  const where=[m.document_type?m.document_type.replaceAll('_',' '):'',m.page!=null?`viewer page ${m.page}`:''].filter(Boolean).join(', ');
+  box.append(element('span','Best match'+(where?` (${where})`:''),'contract-match-label'),text);return box;
+}
 function county(c){c=(c||'').trim();if(!c)return '';if(/^various$/i.test(c))return 'Various counties';return /[,-]/.test(c)?`${c} counties`:`${c} County`;}
 function cards(data){
  results.replaceChildren();const searchState={...active};
@@ -60,6 +67,7 @@ function cards(data){
   const info=element('span',undefined,'contract-info');
   if(row.description){const desc=element('span',row.description,'contract-desc');desc.title=row.description;info.append(desc);}
   info.append(element('span',[county(row.counties),row.route||'',row.letting_date?`Letting ${row.letting_date}`:'',row.item_number?`Item ${row.item_number}`:''].filter(Boolean).join(' · '),'contract-meta'));
+  if(row.match)info.append(bestMatch(row.match));
   const disclosure=element('span','Show matching PDFs','contract-disclosure');
   summary.append(heading,info,disclosure);
   const contents=element('div',undefined,'contract-contents');

@@ -46,6 +46,7 @@ function documentCard(row,searchState){
   details.ontoggle=()=>{if(details.open&&!started)load();};more.onclick=load;
   details.append(pages,error,more);card.append(details);return card;
 }
+function county(c){c=(c||'').trim();if(!c)return '';if(/^various$/i.test(c))return 'Various counties';return /[,-]/.test(c)?`${c} counties`:`${c} County`;}
 function cards(data){
  results.replaceChildren();const searchState={...active};
  for(const row of data.results){
@@ -56,9 +57,11 @@ function cards(data){
   const summary=element('summary');
   const heading=element('span',undefined,'contract-heading');
   heading.append(element('span','Contract','contract-kicker'),element('strong',contract,'contract-number'));
-  const meta=element('span',[row.letting_date?`Letting ${row.letting_date}`:'',row.item_number?`Item ${row.item_number}`:''].filter(Boolean).join(' · '),'contract-meta');
+  const info=element('span',undefined,'contract-info');
+  if(row.description){const desc=element('span',row.description,'contract-desc');desc.title=row.description;info.append(desc);}
+  info.append(element('span',[county(row.counties),row.route||'',row.letting_date?`Letting ${row.letting_date}`:'',row.item_number?`Item ${row.item_number}`:''].filter(Boolean).join(' · '),'contract-meta'));
   const disclosure=element('span','Show matching PDFs','contract-disclosure');
-  summary.append(heading,meta,disclosure);
+  summary.append(heading,info,disclosure);
   const contents=element('div',undefined,'contract-contents');
   const status=element('p','Loading matching PDFs…','contract-status');
   const list=element('div',undefined,'contract-documents');

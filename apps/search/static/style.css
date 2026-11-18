@@ -87,6 +87,9 @@ input:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible,b
 .contract-heading{display:flex;flex-direction:column;gap:1px;min-width:150px}
 .contract-kicker{font-size:.72rem;text-transform:uppercase;letter-spacing:.11em;color:var(--muted);font-weight:650}
 .contract-number{font-size:clamp(1.5rem,3vw,2rem);line-height:1.15;color:var(--text);letter-spacing:-.025em}
+.contract-info{display:flex;flex-direction:column;gap:5px;flex:1 1 320px;min-width:0}
+.contract-desc{color:var(--text);font-size:.98rem;line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.contract-details[open] .contract-desc{display:block;-webkit-line-clamp:unset;line-clamp:none}
 .contract-meta{color:var(--muted);font-size:.9rem}
 .contract-disclosure{margin-left:auto;color:var(--accent);font-weight:650;font-size:.88rem}
 .contract-contents{padding:18px 20px 22px;background:var(--panel2)}

@@ -119,6 +119,33 @@ def search(p):
 # BEGIN OpenDOT contract grouping
 CONTRACT_CACHE=OrderedDict()
 
+def describe(rows):
+    """Add IDOT's description of each contract, from contract-descriptions.sqlite3 (built by
+    build_descriptions.py): the bulletin description (2018 on) or the Notice to Bidders text in
+    the specifications. Missing database or rows leave the cards as they were."""
+    path=Path(os.environ.get('OPENDOT_DESCRIPTIONS',str(Path.home()/'opendot-search/state/contract-descriptions.sqlite3')))
+    contracts=sorted({r['contract'] for r in rows if r['contract']})
+    if not contracts or not path.exists():return
+    marks=','.join('?'*len(contracts))
+    try:
+        with closing(sqlite3.connect(path.as_uri()+'?mode=ro',uri=True,timeout=5)) as db:
+            found=db.execute(
+                f"SELECT 0,contract,letting_date,description,counties,'' FROM bulletin WHERE contract IN ({marks}) AND description<>'' "
+                f"UNION ALL SELECT 1,contract,letting_date,description,county,route FROM spec WHERE contract IN ({marks})",
+                contracts+contracts).fetchall()
+    except sqlite3.Error:
+        return
+    for row in rows:
+        mine=[f for f in found if f[1]==row['contract']]
+        if not mine:continue
+        # Same letting first (a contract number can be re-let), then bulletin over specifications, then newest.
+        mine.sort(key=lambda f:(f[2]!=row['letting_date'],f[0],[-ord(c) for c in f[2]]))
+        same=[f for f in mine if f[2]==mine[0][2]]
+        bulletin=next((f for f in same if f[0]==0),None); spec=next((f for f in same if f[0]==1),None)
+        row['description']=(bulletin or spec)[3]
+        row['counties']=(bulletin[4] if bulletin and bulletin[4] else spec[4] if spec else '')
+        row['route']=spec[5] if spec else ''
+
 def contract_search(p):
     key=json.dumps(p,sort_keys=True)
     with LOCK:
@@ -141,6 +168,7 @@ def contract_search(p):
         rows.append({'contract':src.get('contract') or '',
                      'item_number':src.get('item_number') or '',
                      'letting_date':src.get('letting_date') or ''})
+    describe(rows)
     total=data['hits']['total']
     agg=data.get('aggregations',{})
     contracts=int(agg.get('contracts',{}).get('value',0))

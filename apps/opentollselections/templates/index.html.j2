@@ -1,0 +1,47 @@
+{% extends "solara.html.j2" %}
+
+{% block header %}
+{{ super() }}
+
+<meta name="description"
+      content="Search Illinois Tollway professional services selections: selected engineering firms, PSB numbers, project descriptions and selection history.">
+
+<link rel="canonical" href="https://tollselections.open-dot.org/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Open DOT">
+<meta property="og:title" content="OpenTollSelections | Illinois Tollway Engineering Consultant Selections">
+<meta property="og:description" content="Search Illinois Tollway professional services selections: selected engineering firms, PSB numbers, project descriptions and selection history.">
+<meta property="og:url" content="https://tollselections.open-dot.org/">
+<meta property="og:image" content="https://open-dot.org/open-dot-logo.png">
+<meta name="twitter:card" content="summary">
+
+{% endblock header %}
+
+{% block after_pre_rendered_html %}
+
+<section id="opendot-seo-info"
+         aria-label="About OpenTollSelections"
+         style="max-width:960px; margin:32px auto;
+                padding:24px; font-family:system-ui,sans-serif;
+                color:#263445; background:#f4f7f9;
+                border-radius:12px;">
+
+  <h2>Illinois Tollway Engineering Consultant Selections</h2>
+
+  <p>
+    OpenTollSelections provides searchable Illinois Tollway engineering consultant selections from Professional Services Bulletins (PSBs).
+  </p>
+
+  <p>
+    Search selected firms, PSB items, project descriptions and historical selection results to research Illinois Tollway engineering opportunities.
+  </p>
+
+  <p>
+    <a href="https://open-dot.org/">
+      Explore other OpenDOT transportation data tools
+    </a>
+  </p>
+
+</section>
+
+{% endblock after_pre_rendered_html %}

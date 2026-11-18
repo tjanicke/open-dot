@@ -17,6 +17,9 @@ COPY psb_selection_data.parquet .
 
 EXPOSE 8765
 
+# Server-rendered SEO template (description, canonical link, indexable text)
+COPY templates/ /templates/
+
 CMD ["solara", "run", "opentollselections.py", "--host=0.0.0.0", "--port=8765"]
 
 # OpenDOT Umami Analytics

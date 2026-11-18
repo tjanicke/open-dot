@@ -1,0 +1,47 @@
+{% extends "solara.html.j2" %}
+
+{% block header %}
+{{ super() }}
+
+<meta name="description"
+      content="Search Illinois Tollway construction bid results: contracts, project descriptions, pay items and unit prices from public Tollway lettings.">
+
+<link rel="canonical" href="https://tolls.open-dot.org/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Open DOT">
+<meta property="og:title" content="OpenTollz | Illinois Tollway Construction Bid Results">
+<meta property="og:description" content="Search Illinois Tollway construction bid results: contracts, project descriptions, pay items and unit prices from public Tollway lettings.">
+<meta property="og:url" content="https://tolls.open-dot.org/">
+<meta property="og:image" content="https://open-dot.org/open-dot-logo.png">
+<meta name="twitter:card" content="summary">
+
+{% endblock header %}
+
+{% block after_pre_rendered_html %}
+
+<section id="opendot-seo-info"
+         aria-label="About OpenTollz"
+         style="max-width:960px; margin:32px auto;
+                padding:24px; font-family:system-ui,sans-serif;
+                color:#263445; background:#f4f7f9;
+                border-radius:12px;">
+
+  <h2>Illinois Tollway Construction Bid Results</h2>
+
+  <p>
+    OpenTollz provides searchable Illinois State Toll Highway Authority construction bid results from public letting records, including contract numbers, project descriptions, pay items and unit prices.
+  </p>
+
+  <p>
+    Compare pay item unit prices across Tollway contracts to support cost estimating, bid research and transportation project analysis.
+  </p>
+
+  <p>
+    <a href="https://open-dot.org/">
+      Explore other OpenDOT transportation data tools
+    </a>
+  </p>
+
+</section>
+
+{% endblock after_pre_rendered_html %}

@@ -15,4 +15,7 @@ COPY ohioselections.py .
 ENV ODOT_DATA_DIR=/app/data
 EXPOSE 8765
 
+# Server-rendered SEO template (description, canonical link, indexable text)
+COPY templates/ /templates/
+
 CMD ["solara", "run", "ohioselections.py", "--host=0.0.0.0", "--port=8765"]

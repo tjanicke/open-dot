@@ -1,0 +1,47 @@
+{% extends "solara.html.j2" %}
+
+{% block header %}
+{{ super() }}
+
+<meta name="description"
+      content="Search Ohio DOT programmatic engineering consultant selections: selected firms, projects and selection history from Ohio Controlling Board records.">
+
+<link rel="canonical" href="https://odotselections.open-dot.org/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Open DOT">
+<meta property="og:title" content="ODOT Selections | Ohio DOT Engineering Consultant Selections">
+<meta property="og:description" content="Search Ohio DOT programmatic engineering consultant selections: selected firms, projects and selection history from Ohio Controlling Board records.">
+<meta property="og:url" content="https://odotselections.open-dot.org/">
+<meta property="og:image" content="https://open-dot.org/open-dot-logo.png">
+<meta name="twitter:card" content="summary">
+
+{% endblock header %}
+
+{% block after_pre_rendered_html %}
+
+<section id="opendot-seo-info"
+         aria-label="About ODOT Selections"
+         style="max-width:960px; margin:32px auto;
+                padding:24px; font-family:system-ui,sans-serif;
+                color:#263445; background:#f4f7f9;
+                border-radius:12px;">
+
+  <h2>Ohio DOT Engineering Consultant Selections</h2>
+
+  <p>
+    ODOT Selections provides searchable Ohio Department of Transportation engineering consultant selections compiled from public Ohio Controlling Board records.
+  </p>
+
+  <p>
+    Search selected consulting firms, projects and historical selection results to research Ohio transportation engineering work.
+  </p>
+
+  <p>
+    <a href="https://open-dot.org/">
+      Explore other OpenDOT transportation data tools
+    </a>
+  </p>
+
+</section>
+
+{% endblock after_pre_rendered_html %}

@@ -57,10 +57,14 @@ def search_body(p):
     for field,key in [('document_type','type'),('contract','contract')]:
         if p[key]: filters.append({'term':{field:p[key]}})
     query={'simple_query_string':{'query':p['q'],'fields':['content'],'default_operator':'and'}} if p['q'] else {'match_all':{}}
+    # Rank pages where the words appear together (e.g. IL 53) above pages that only contain them
+    # somewhere. Scoring only: the set of matching pages is unchanged.
+    words=' '.join(re.sub(r'["+|*()~\\-]',' ',p['q']).split())
+    should=[{'match_phrase':{'content':{'query':words,'slop':1,'boost':5}}}] if len(words.split())>1 else []
     sort=[{'_score':'desc'},{'document_id':'asc'}]
     if p['sort']!='relevance':sort=[{'letting_date':'desc' if p['sort']=='newest' else 'asc'},{'document_id':'asc'}]
     return {'size':11,'from':(p['page']-1)*10,'timeout':'20s','track_total_hits':10000,'_source':META,
-            'query':{'bool':{'must':[query],'filter':filters}},'sort':sort,
+            'query':{'bool':{'must':[query],'should':should,'filter':filters}},'sort':sort,
             'aggs':{'pdfs':{'terms':{'field':'document_id','size':5001}},
                     'pdf_estimate':{'cardinality':{'field':'document_id','precision_threshold':40000}}},
             'collapse':{'field':'document_id','inner_hits':{'name':'matches','size':3,'_source':META+['content'],

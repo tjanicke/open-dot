@@ -28,6 +28,18 @@ const typeLabel = t => labels[t] || (t ? t.replaceAll('_', ' ') : 'Type unknown'
 const pdfLink = (url, text) => url ? el('a', text, 'pdf', {href: url, target: '_blank', rel: 'noopener'})
   : el('span', text + ' · no verified IDOT link', 'nolink', {title: 'This PDF is not in the verified IDOT link catalogue yet'});
 
+// Umami events: what visitors do, never what they typed.
+function track(name, data) {
+  try { if (window.umami && typeof window.umami.track === 'function') window.umami.track(name, data); } catch (_) {}
+}
+document.addEventListener('click', e => {
+  const a = e.target.closest && e.target.closest('a');
+  if (!a) return;
+  if (a.id === 'export') track('Export CSV');
+  else if (a.classList.contains('pdf')) track('Open plan PDF');
+  else if (a.classList.contains('ext')) track('Open IDOT folder');
+}, true);
+
 async function api(url) {
   const r = await fetch(url);
   const d = await r.json().catch(() => ({}));
@@ -108,6 +120,7 @@ function groupRow(g) {
   list.hidden = true;
   more.addEventListener('click', async () => {
     if (!list.hidden) { list.hidden = true; more.textContent = 'All sheets'; return; }
+    track('Show all sheets');
     if (!list.childElementCount) {
       const d = await api('api/group?id=' + g.id);
       for (const p of d.pages) {
@@ -170,6 +183,7 @@ $('filters').addEventListener('submit', e => {
   for (const [k, v] of new FormData(e.target)) if (String(v).trim()) params.set(k, String(v).trim());
   offset = 0;
   history.replaceState(null, '', '?' + params);
+  track('Search', {filters: [...params.keys()].filter(k => k !== 'q').join(',') || 'none'});
   loadStats().catch(() => {});
   load();
 });

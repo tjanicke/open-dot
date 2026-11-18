@@ -608,6 +608,29 @@ export default {
 ''').tag(sync=True)
 
 
+class _OpenDOTAnalytics(_od_vuetify.VuetifyTemplate):
+    """Load Umami page-view analytics once per browser page (no cookies, no form values)."""
+    template = _od_traits.Unicode(r'''
+<template><span style="display:none"></span></template>
+<script>
+export default {
+  mounted() {
+    const id = '7cf5c7ea-bc28-4e27-9cd9-cf2022a5af8d';
+    if (document.querySelector('script[data-website-id="' + id + '"]')) return;
+    const s = document.createElement('script');
+    s.src = 'https://collect.open-dot.org/script.js';
+    s.defer = true;
+    s.setAttribute('data-website-id', id);
+    s.setAttribute('data-host-url', 'https://collect.open-dot.org');
+    s.setAttribute('data-domains', 'odotselections.open-dot.org');
+    s.setAttribute('data-exclude-search', 'true');
+    document.head.appendChild(s);
+  }
+};
+</script>
+''').tag(sync=True)
+
+
 def _opendot_configure_theme():
     """Configure Vuetify 3's native colors for this visitor's session."""
     for mode, colors in (
@@ -819,6 +842,7 @@ def Page():
     solara.Style(APP_CSS)
     solara.Style(_OPENDOT_STYLE)
     with solara.Column(classes=["odotselections-app"], gap="12px"):
+        _OpenDOTAnalytics.element()
         with solara.Row(justify="space-between", classes=["opendot-page-heading"],
                         style="align-items: center; flex-wrap: wrap; gap: 16px;"):
             with solara.Column(gap="2px", style="flex: 1 1 auto; min-width: 0;"):
